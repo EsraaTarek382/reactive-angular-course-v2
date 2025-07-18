@@ -1,1 +1,10 @@
 
+<div class="spinner-container" *ngIf="loadingService.loading$ | async">
+
+  <h2>Loading...</h2>
+
+  <!-- You can use any spinner component here, for example, Angular Material's spinner -->
+  <!-- Make sure to import MatProgressSpinnerModule in your module if you use Angular Material -->
+<mat-spinner></mat-spinner>
+
+</div>
