@@ -4,7 +4,7 @@ import { concatMap, finalize, tap } from "rxjs/operators";
 
 
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class LoadingService {
 
 //subject can define when an observable emit a value

@@ -8,6 +8,7 @@ import {throwError} from 'rxjs';
 import { CoursesService } from '../services/courses.service';
 import { LoadingService } from '../loading/loading.service';
 import { MessagesService } from '../messages/messages.service';
+import { CoursesStore } from '../services/courses.store';
 
 
 
@@ -29,10 +30,9 @@ export class CourseDialogComponent implements AfterViewInit {
         private fb: FormBuilder,
         private dialogRef: MatDialogRef<CourseDialogComponent>,
         @Inject(MAT_DIALOG_DATA) course:Course,
-    private courseService:CoursesService,
-private loadingService: LoadingService,
+    private courseStore: CoursesStore,
 private messagesService: MessagesService) {
-
+// not removed because the error message is displayed locally
         this.course = course;
 
         this.form = fb.group({
@@ -52,21 +52,12 @@ private messagesService: MessagesService) {
     save() {
      const changes = this.form.value;
 
-     const saveCourse$ = this.courseService.saveCourse(this.course.id, changes)
-     .pipe(
-        catchError(err => {
-            console.log('Error saving course', err);
-            const message= 'Could not save course. Try again later.';
-            this.messagesService.showErrors(message);
-            return throwError(err);
-        })
-     );
+      this.courseStore.saveCourse(this.course.id, changes)
+    .subscribe();
 
-        this.loadingService.showLoadingUntilComplete(saveCourse$).subscribe(
-        (val) => {
-           this.dialogRef.close(val);
-        }
-        )
+     this.dialogRef.close(changes);
+
+      
     }
 
     close() {
