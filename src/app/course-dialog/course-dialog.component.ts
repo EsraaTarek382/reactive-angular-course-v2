@@ -7,6 +7,7 @@ import {catchError} from 'rxjs/operators';
 import {throwError} from 'rxjs';
 import { CoursesService } from '../services/courses.service';
 import { LoadingService } from '../loading/loading.service';
+import { MessagesService } from '../messages/messages.service';
 
 
 
@@ -15,7 +16,9 @@ import { LoadingService } from '../loading/loading.service';
     templateUrl: './course-dialog.component.html',
     styleUrls: ['./course-dialog.component.css'],
     standalone: false,
-    providers: [LoadingService] // Provide LoadingService at the component level (not availabe to indirect children)
+    providers: [LoadingService,
+        MessagesService
+    ] // Provide LoadingService at the component level (not availabe to indirect children)
 })
 export class CourseDialogComponent implements AfterViewInit {
   form: FormGroup;
@@ -27,7 +30,8 @@ export class CourseDialogComponent implements AfterViewInit {
         private dialogRef: MatDialogRef<CourseDialogComponent>,
         @Inject(MAT_DIALOG_DATA) course:Course,
     private courseService:CoursesService,
-private loadingService: LoadingService) {
+private loadingService: LoadingService,
+private messagesService: MessagesService) {
 
         this.course = course;
 
@@ -47,7 +51,17 @@ private loadingService: LoadingService) {
 
     save() {
      const changes = this.form.value;
-     const saveCourse$ = this.courseService.saveCourse(this.course.id, changes);
+
+     const saveCourse$ = this.courseService.saveCourse(this.course.id, changes)
+     .pipe(
+        catchError(err => {
+            console.log('Error saving course', err);
+            const message= 'Could not save course. Try again later.';
+            this.messagesService.showErrors(message);
+            return throwError(err);
+        })
+     );
+
         this.loadingService.showLoadingUntilComplete(saveCourse$).subscribe(
         (val) => {
            this.dialogRef.close(val);
